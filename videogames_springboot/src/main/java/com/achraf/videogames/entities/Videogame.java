@@ -1,11 +1,9 @@
 package com.achraf.videogames.entities;
 import java.util.Date;
+import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
 @Entity
 public class Videogame {
@@ -17,8 +15,21 @@ public class Videogame {
     private Date dateCreation ;
     @ManyToOne
     private Genre genre;
-    
-  public Genre getGenre() {
+	@OneToMany (mappedBy = "videogame")
+	@JsonIgnore
+	private List<Image> images;
+
+	private String imagePath;
+
+	public String getImagePath() {
+		return imagePath;
+	}
+
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
+	}
+
+	public Genre getGenre() {
 		return genre;
 	}
 
@@ -73,4 +84,16 @@ public Videogame(String nomVideogame,double prixVideogame,Date dateCreation) {
 	  this.prixVideogame = prixVideogame;
 	  this.dateCreation = dateCreation ;
   }
+
+	public List<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Image> images) {
+		this.images = images;
+	}
+
+	public void AddImage(Image image){
+		this.images.add(image);
+	}
 }

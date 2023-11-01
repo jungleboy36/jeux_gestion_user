@@ -1,7 +1,12 @@
 package com.achraf.videogames.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.achraf.videogames.dto.VideogameDTO;
+import com.achraf.videogames.repos.ImageRepository;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,14 +17,25 @@ import com.achraf.videogames.repos.VideogameRepository;
 public class VideogameServiceImpl implements VideogameService{
     @Autowired
 	VideogameRepository videogameRepository ;
+
+	@Autowired
+	ModelMapper modelMapper;
+
+
+	@Autowired
+	ImageRepository imageRepository;
     @Override
-	public Videogame saveVideogame(Videogame v) {
-		return videogameRepository.save(v);
+	public VideogameDTO saveVideogame(VideogameDTO v) {
+		return convertEntityToDto(videogameRepository.save(convertDtoToEntity(v)));
 	}
 
 	@Override
-	public Videogame updateVideogame(Videogame v) {
-		return videogameRepository.save(v);
+	public VideogameDTO updateVideogame(VideogameDTO v) {
+		Videogame vidUpdated = videogameRepository.save(convertDtoToEntity(v));
+
+		return convertEntityToDto(vidUpdated) ;
+
+
 	}
 
 	@Override
@@ -35,13 +51,15 @@ public class VideogameServiceImpl implements VideogameService{
 	}
 
 	@Override
-	public Videogame getVideogame(long id) {
-		return videogameRepository.findById(id).get();
+	public VideogameDTO getVideogame(long id) {
+		return convertEntityToDto(videogameRepository.findById(id).get());
 	}
 
 	@Override
-	public List<Videogame> getAllVideogames() {
-		return videogameRepository.findAll();
+	public List<VideogameDTO> getAllVideogames() {
+		return videogameRepository.findAll().stream()
+				.map(this::convertEntityToDto)
+				.collect(Collectors.toList());
 	}
 	@Override
 	public List<Videogame> findByNomVideogame(String nom) {
@@ -72,5 +90,40 @@ public class VideogameServiceImpl implements VideogameService{
 	return videogameRepository.trierVideogamesNomsPrix();
 	}
 
+	@Override
+	public VideogameDTO convertEntityToDto(Videogame videogame) {
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+		VideogameDTO videogameDTO = modelMapper.map(videogame, VideogameDTO.class);
+
+		/*VideogameDTO videogameDTO = new VideogameDTO();
+		videogameDTO.setIdVideogame(videogame.getIdVideogame());
+		videogameDTO.setNomVideogame(videogame.getNomVideogame());
+		videogameDTO.setPrixVideogame(videogame.getPrixVideogame());
+		videogameDTO.setDateCreation(videogame.getDateCreation());
+		videogameDTO.setGenre(videogame.getGenre());*/
+
+		return videogameDTO;
+
+ /*return VideogameDTO.builder()
+.idVideogame(videogame.getIdVideogame())
+.nomVideogame(videogame.getNomVideogame())
+.prixVideogame(videogame.getPrixVideogame())
+.dateCreation(p.getDateCreation())
+.categorie(videogame.getGenre())
+.build();*/
+	}
+
+	@Override
+	public Videogame convertDtoToEntity(VideogameDTO videogameDto) {
+		Videogame videogame = new Videogame();
+		videogame = modelMapper.map(videogameDto, Videogame.class);
+		/*Videogame videogame = new Videogame();
+		videogame.setIdVideogame(videogameDto.getIdVideogame());
+		videogame.setNomVideogame(videogameDto.getNomVideogame());
+		videogame.setPrixVideogame(videogameDto.getPrixVideogame());
+		videogame.setDateCreation(videogameDto.getDateCreation());
+		videogame.setGenre(videogameDto.getGenre());*/
+		return videogame;
+	}
 
 }
